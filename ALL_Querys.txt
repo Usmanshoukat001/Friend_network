@@ -1,0 +1,180 @@
+ //query to retrieve the suggested users
+
+    $suggestionUser = User::whereNotIn('id', function ($query) use ($userId) {
+    $query->select('following_id')
+        ->from('common_followings')
+        ->where('follower_id', $userId)
+        ->orWhere('following_id', $userId);
+    })->limit(10)->get();
+ ------------------------------------------------------------------------------------  
+
+//query to retrieve the total count of suggested users
+    
+    $totalSuggestionUser = User::whereNotIn('id', function ($query) use ($userId) {
+    $query->select('following_id')
+        ->from('common_followings')
+        ->where('follower_id', $userId)
+        ->orWhere('following_id', $userId);
+    })->get();
+  ------------------------------------------------------------------------------------       
+   
+//query to retrieve the more suggested users
+     
+     getmoreSuggestionUser = User::whereBetween('id', array($urlValue, $addPaginate))
+        ->whereNotIn('id', function ($query) use ($userId) {
+            $query->select('following_id')
+                ->from('common_followings')
+                ->where('follower_id', $userId)
+                ->orWhere('following_id', $userId);
+    })->get();
+ ------------------------------------------------------------------------------------       
+
+//query to retrieve the sent request users
+
+    $getRequest = CommonFollowing::where('follower_id', auth()->id())
+                ->where('approved',0)
+                ->with('follower')
+                ->limit(10)
+                ->get();
+ ------------------------------------------------------------------------------------       
+
+//query to retrieve the count sent request users
+               
+    $getRequestCount = CommonFollowing::where('follower_id', auth()->id())
+                ->where('approved',0)
+                ->with('follower')
+                ->get();
+ ------------------------------------------------------------------------------------       
+
+//query to retrieve the received request users
+
+    $getRequest = CommonFollowing::where('following_id', auth()->id())
+                ->where('approved',0)
+                ->with('following')
+                ->limit(10)
+                ->get();
+ ------------------------------------------------------------------------------------      
+
+//query to retrieve the count received request users
+
+   $getRequestCount = CommonFollowing::where('following_id', auth()->id())
+                ->where('approved',0)
+                ->with('following')
+                ->get();
+ ------------------------------------------------------------------------------------    
+
+//query to retrieve the more sent request users
+
+     $getpaginateValue = CommonFollowing::where('id','>', $urlValue)->where('follower_id', auth()->id())
+            ->where('approved',0)
+            ->with('follower')
+            ->limit(10)
+            ->get();
+
+    $getmoreRequested = CommonFollowing::where('id','>', $getpaginateValue[9]->id)->where('follower_id', auth()->id())
+            ->where('approved',0)
+            ->with('follower')
+            ->limit(10)
+            ->get();
+            $addRequestedPaginate = $getmoreRequested[9]->id;
+------------------------------------------------------------------------------------       
+//query to retrieve the more received request users
+
+    $getpaginateValue = CommonFollowing::where('id','>', $urlValue)->where('following_id', auth()->id())
+            ->where('approved',0)
+            ->with('following')
+            ->limit(10)
+            ->get();
+
+    $getmoreRequested = CommonFollowing::where('id','>', $getpaginateValue[9]->id)->where('following_id', auth()->id())
+            ->where('approved',0)
+            ->with('following')
+            ->limit(10)
+            ->get();
+            $addRequestedPaginate = $getmoreRequested[9]->id;
+------------------------------------------------------------------------------------ 
+
+//query to sent request users
+
+    $updateRequest = CommonFollowing::where('id' , $urlacceptitemId)->update(['approved' => 1]);
+------------------------------------------------------------------------------------ 
+
+//query to withdraw request users
+
+    $withdrawItem = CommonFollowing::where('id' , $urlitemId)->delete();
+
+------------------------------------------------------------------------------------ 
+
+//query to get connection users
+
+    $userId = Auth()->id();
+      $getConnection = CommonFollowing::where(function($query) use ($userId) {
+        $query->where('following_id', $userId)->where('approved', 1);
+
+    })->orWhere(function($query) use ($userId) {
+        $query->where('follower_id', $userId)->where('approved', 1);
+
+    })->with(['following', 'follower'])->get();
+------------------------------------------------------------------------------------ 
+
+//query to get count connection users
+
+    $totalConnection = CommonFollowing::with('follower')
+      ->with('following')
+      ->where('follower_id' , Auth()->id())
+      ->orwhere('following_id' , Auth()->id())
+      ->where('approved' , 1)
+      ->get();
+
+------------------------------------------------------------------------------------ 
+
+//query to get more connection users
+
+      $getConnection = CommonFollowing::where(function($query) use ($userId) {
+            $query->where('following_id', $userId)
+            ->where('approved', 1);
+        })->orWhere(function($query) use ($userId) {
+            $query->where('follower_id', $userId)
+            ->where('approved', 1);
+        })->with(['following', 'follower'])
+           ->limit(10)->get();
+
+------------------------------------------------------------------------------------ 
+
+//query to get common connection users
+
+      $commonConnections = CommonFollowing::where(function ($query) {
+            $query->where('following_id', $_GET['connectionId'])
+            ->where('approved', 1);
+            })->whereIn('follower_id', function ($query) {
+            $query->select('following_id')
+            ->from('common_followings')
+            ->where('follower_id', $_GET['connectionId'])
+            ->where('approved', 1);
+             })->where('approved', 1)
+             ->with(['following', 'follower'])
+             ->limit(10)->get();
+
+------------------------------------------------------------------------------------ 
+
+//query to get more common connection users
+
+      $moreCommonConnections = CommonFollowing::
+            where('id','>', $getLastValue)->where(function ($query) {
+                $query->where('following_id', $_GET['connectionId'])
+                ->where('approved', 1);
+                })->whereIn('follower_id', function ($query) {
+                $query->select('following_id')
+                ->from('common_followings')
+                ->where('follower_id', $_GET['connectionId'])
+                ->where('approved', 1);
+                 })->where('approved', 1)
+                 ->with(['following', 'follower'])
+                 ->limit(10)->get();
+
+------------------------------------------------------------------------------------ 
+
+//query to delete connection users
+
+        $withdrawItem = CommonFollowing::where('id' , $urlConnectionitemId)->delete();
+
